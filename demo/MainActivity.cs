@@ -2,7 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Android.App;
-using Android.Content;
+using Android.Arch.Lifecycle;
 using Android.OS;
 using Android.Runtime;
 using Android.Support.Design.Widget;
@@ -16,12 +16,20 @@ namespace demo
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
     public class MainActivity : AppCompatActivity
     {
+        MainActivityViewModel ViewModel;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.activity_main);
+
+            Initialize();
+        }
+
+        public void Initialize()
+        {
+            ViewModel = ViewModelProviders.(this).Get(Java.Lang.Class.FromType(typeof(MainActivityViewModel))) as MainActivityViewModel;
 
             Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
             SetSupportActionBar(toolbar);
