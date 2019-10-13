@@ -36,6 +36,7 @@ namespace demo.Views
         {
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
+            ExperimentalFeatures.Enable(ExperimentalFeatures.EmailAttachments, ExperimentalFeatures.ShareFileRequest);
             SetContentView(Resource.Layout.activity_main);
             Initialize();
         }
@@ -64,7 +65,11 @@ namespace demo.Views
         public override bool OnOptionsItemSelected(IMenuItem item)
         {
             int id = item.ItemId;
-            if (id == Resource.Id.action_share)
+            if (id == Resource.Id.action_share_text)
+            {
+                _ = ShareText();
+                return true;
+            } else if(id == Resource.Id.action_share)
             {
                 _ = ShareFile();
                 return true;
@@ -73,13 +78,23 @@ namespace demo.Views
             return base.OnOptionsItemSelected(item);
         }
 
-        private async Task ShareFile()
+        private async Task ShareText()
         {
             var fileText = await Task.Run(() => ViewModel.ReadTextAsync());
             await Share.RequestAsync(new ShareTextRequest
             {
                 Title = "Share Text",
                 Text = fileText
+            });
+            
+        }
+
+        private async Task ShareFile()
+        {
+            await Share.RequestAsync(new ShareFileRequest
+            {
+                Title = "Share File",
+                File = new ShareFile(ViewModel.InternalFileLocation)
             });
         }
 

@@ -8,11 +8,11 @@ namespace demo.ViewModels
     public class MainActivityViewModel : Android.Arch.Lifecycle.ViewModel
     {
         public string Text { get; set; }
-        public string FileLocation { get; set; }
+        public string InternalFileLocation { get; set; }
 
         public MainActivityViewModel()
         {
-            FileLocation = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "demo.txt");
+            InternalFileLocation = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "demo.txt");
         }
 
         public async Task SaveTextAsync(string text)
@@ -22,7 +22,7 @@ namespace demo.ViewModels
                 //DateTime = DateTime.Now,
                 Text = text
             };
-            using (var writer = File.CreateText(FileLocation))
+            using (var writer = File.CreateText(InternalFileLocation))
             {
                 await writer.WriteLineAsync(string.Format("{0}", textInfo.Text));
             }
@@ -30,13 +30,13 @@ namespace demo.ViewModels
 
         public async Task<string> ReadTextAsync()
         {
-            if (FileLocation == null || !File.Exists(FileLocation))
+            if (InternalFileLocation == null || !File.Exists(InternalFileLocation))
             {
                 return "";
             }
 
             var fileText = "";
-            using (var reader = new StreamReader(FileLocation, true))
+            using (var reader = new StreamReader(InternalFileLocation, true))
             {
                 string line;
                 while ((line = await reader.ReadLineAsync()) != null)
