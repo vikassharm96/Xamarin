@@ -6,4 +6,8 @@
     <string name="enter_input">Please enter input!</string>
     <string name="data_saved">Data saved successfully!</string>
     <string name="updated_app">Please update your app!</string>
+    <string name="storage_permission">Storage permission required for this app to be functional!</string>
+    <string name="allow_storage">Allow Storage Access</string>
+    <string name="setting_page">You denied our permission.We will redirect you to setting page where you can enable permissions!</string>
+    <string name="allow">Allow</string>
 </resources>
