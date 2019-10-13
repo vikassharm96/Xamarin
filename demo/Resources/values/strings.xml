@@ -2,4 +2,8 @@
 <resources>
     <string name="app_name">Demo</string>
     <string name="action_share">Share</string>
+    <string name="app_updated">Your app is updated!</string>
+    <string name="enter_input">Please enter input!</string>
+    <string name="data_saved">Data saved successfully!</string>
+    <string name="updated_app">Please update your app!</string>
 </resources>

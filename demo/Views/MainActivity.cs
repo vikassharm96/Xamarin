@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Android.App;
 using Android.Arch.Lifecycle;
+using Android.Content;
 using Android.OS;
 using Android.Runtime;
 using Android.Support.Design.Widget;
@@ -40,6 +41,8 @@ namespace demo.Views
             Button SaveText = FindViewById<Button>(Resource.Id.btn_save_text);
             SaveText.Click += SaveOnClick;
 
+            FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
+            fab.Click += FabOnClick;
             //fileLocation = Path.Combine(Xamarin.Essentials.FileSystem.AppDataDirectory, "demo.txt");
         }
 
@@ -63,12 +66,11 @@ namespace demo.Views
 
         private async Task ShareFile()
         {
-            // saving file to internal now to share operation simply do it by copy
-            // to external storage and share
-            await Share.RequestAsync(new ShareFileRequest
+            var fileText = await Task.Run(() => ViewModel.ReadTextAsync());
+            await Share.RequestAsync(new ShareTextRequest
             {
-                Title = "Select",
-                File = new ShareFile(Path.GetFileName(fileLocation))
+                Title = "Share Text",
+                Text = fileText
             });
         }
 
@@ -84,22 +86,38 @@ namespace demo.Views
             builder.SetPositiveButton("Save", (s, args) => {
                 if (String.IsNullOrWhiteSpace(editText.Text))
                 {
-                    Snackbar.Make(view, "Please enter input!", Snackbar.LengthLong)
+                    Snackbar.Make(view, Resource.String.enter_input, Snackbar.LengthShort)
                     .SetAction("Action", (Android.Views.View.IOnClickListener)null).Show();
                     return;
                 }
                 else
                 {
                     _ = ViewModel.SaveTextAsync(editText.Text);
-                    if (true)
-                    {
-                        Snackbar.Make(view, "Data saved successfully!", Snackbar.LengthLong)
-                        .SetAction("Action", (Android.Views.View.IOnClickListener)null).Show();
-                        return;
-                    }
+                    Snackbar.Make(view, Resource.String.data_saved, Snackbar.LengthShort)
+                    .SetAction("Action", (Android.Views.View.IOnClickListener)null).Show();
                 }
             });
             builder.Show();
+        }
+
+        private void FabOnClick(object sender, EventArgs eventArgs)
+        {
+            if (GetVersion().Equals("1.0"))
+            {
+                View view = (View)sender;
+                Snackbar.Make(view, Resource.String.updated_app, Snackbar.LengthLong)
+                    .SetAction("Action", (Android.Views.View.IOnClickListener)null).Show();
+            } else
+            {
+                StartActivity(new Intent(Application.Context, typeof(DetailActivity)));
+            }
+            
+        }
+
+        private string GetVersion()
+        {
+            Version version = AppInfo.Version;
+            return string.Format("{0}.{1}", version.Major, version.Minor);
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
@@ -108,6 +126,5 @@ namespace demo.Views
 
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
-
     }
 }

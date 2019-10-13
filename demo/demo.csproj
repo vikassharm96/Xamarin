@@ -65,6 +65,7 @@
     <Compile Include="Models\TextInfo.cs" />
     <Compile Include="Views\SplashActivity.cs" />
     <Compile Include="Views\MainActivity.cs" />
+    <Compile Include="Views\DetailActivity.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\AboutResources.txt" />
@@ -106,6 +107,10 @@
       <Generator></Generator>
     </AndroidResource>
     <AndroidResource Include="Resources\drawable\splash_logo.png" />
+    <AndroidResource Include="Resources\layout\activity_detail.xml">
+      <SubType></SubType>
+      <Generator></Generator>
+    </AndroidResource>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\drawable\" />
