@@ -1,5 +1,5 @@
 ﻿using System;
-namespace demo.Model
+namespace demo.Models
 {
     public class TextInfo
     {

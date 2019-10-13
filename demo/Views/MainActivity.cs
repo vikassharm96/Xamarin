@@ -9,14 +9,17 @@ using Android.Support.Design.Widget;
 using Android.Support.V7.App;
 using Android.Views;
 using Android.Widget;
+using demo.ViewModels;
 using Xamarin.Essentials;
+using AlertDialog = Android.Support.V7.App.AlertDialog;
 
-namespace demo
+namespace demo.Views
 {
-    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
+    [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar")]
     public class MainActivity : AppCompatActivity
     {
         MainActivityViewModel ViewModel;
+        string fileLocation;
 
         protected override void OnCreate(Bundle savedInstanceState)
         {
@@ -29,13 +32,15 @@ namespace demo
 
         public void Initialize()
         {
-            ViewModel = ViewModelProviders.(this).Get(Java.Lang.Class.FromType(typeof(MainActivityViewModel))) as MainActivityViewModel;
+            ViewModel = ViewModelProviders.Of(this).Get(Java.Lang.Class.FromType(typeof(MainActivityViewModel))) as MainActivityViewModel;
 
             Android.Support.V7.Widget.Toolbar toolbar = FindViewById<Android.Support.V7.Widget.Toolbar>(Resource.Id.toolbar);
             SetSupportActionBar(toolbar);
 
             Button SaveText = FindViewById<Button>(Resource.Id.btn_save_text);
             SaveText.Click += SaveOnClick;
+
+            //fileLocation = Path.Combine(Xamarin.Essentials.FileSystem.AppDataDirectory, "demo.txt");
         }
 
         public override bool OnCreateOptionsMenu(IMenu menu)
@@ -50,7 +55,6 @@ namespace demo
             if (id == Resource.Id.action_share)
             {
                 _ = ShareFile();
-                _ = ReadCountAsync();
                 return true;
             }
 
@@ -59,22 +63,43 @@ namespace demo
 
         private async Task ShareFile()
         {
-            //var backingFile = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "demo.txt");
-            var backingFile = Path.Combine(Xamarin.Essentials.FileSystem.AppDataDirectory, "demo.txt");
+            // saving file to internal now to share operation simply do it by copy
+            // to external storage and share
             await Share.RequestAsync(new ShareFileRequest
             {
                 Title = "Select",
-                File = new ShareFile(Path.GetFileName(backingFile))
+                File = new ShareFile(Path.GetFileName(fileLocation))
             });
         }
 
-        private void SaveOnClick(object sender, EventArgs eventArgs)
+        private async void SaveOnClick(object sender, EventArgs eventArgs)
         {
-            _ = SaveTextAsync("vikas sharma");
             View view = (View)sender;
-            Snackbar.Make(view, "Replace with your own action", Snackbar.LengthLong)
-                .SetAction("Action", (Android.Views.View.IOnClickListener)null).Show();
-
+            EditText editText = new EditText(this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            var fileText = await Task.Run(() => ViewModel.ReadTextAsync());
+            editText.Text = fileText;
+            builder.SetTitle("Save Text");
+            builder.SetView(editText);
+            builder.SetPositiveButton("Save", (s, args) => {
+                if (String.IsNullOrWhiteSpace(editText.Text))
+                {
+                    Snackbar.Make(view, "Please enter input!", Snackbar.LengthLong)
+                    .SetAction("Action", (Android.Views.View.IOnClickListener)null).Show();
+                    return;
+                }
+                else
+                {
+                    _ = ViewModel.SaveTextAsync(editText.Text);
+                    if (true)
+                    {
+                        Snackbar.Make(view, "Data saved successfully!", Snackbar.LengthLong)
+                        .SetAction("Action", (Android.Views.View.IOnClickListener)null).Show();
+                        return;
+                    }
+                }
+            });
+            builder.Show();
         }
 
         public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
@@ -84,34 +109,5 @@ namespace demo
             base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
         }
 
-        public async Task SaveTextAsync(string text)
-        {
-            var backingFile = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "demo.txt");
-            var writer = File.CreateText(backingFile);
-            await writer.WriteLineAsync(text);
-        }
-
-        public async Task<string> ReadCountAsync()
-        {
-            var backingFile = Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal), "demo.txt");
-
-            if (backingFile == null || !File.Exists(backingFile))
-            {
-                return "";
-            }
-
-            var text = "";
-            using (var reader = new StreamReader(backingFile, true))
-            {
-                string line;
-                while ((line = await reader.ReadLineAsync()) != null)
-                {
-                    text = line;
-                }
-            }
-
-            return text;
-        }
     }
 }
-
